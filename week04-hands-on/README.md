@@ -3,7 +3,7 @@
 > **날짜**: 2026년 4월 첫째 주
 > **대상**: VSCode 설치 완료, AI 대화 해본 분들
 > **목표**: CLAUDE.md를 직접 만들고, 그걸로 AI에게 코드를 시켜본다
-> **소요시간**: 약 90분
+> **소요시간**: 약 105분
 
 ---
 
@@ -12,9 +12,11 @@
 ```
 [준비] 폴더 열기 & 파일 확인          (10분)
   ↓
+[Step 0] 하네스 개념 이해하기         (20분)  ← 3단계 비교 체험
+  ↓
 [Step 1] CLAUDE.md 만들기             (25분)  ← 같이 한 줄씩
   ↓
-[Step 2] 만든 MD로 바이브코딩 체험    (30분)  ← AI한테 코드 시키기
+[Step 2] 만든 MD로 바이브코딩 체험    (25분)  ← AI한테 코드 시키기
   ↓
 [Step 3] 여러 파일 합치기 체험        (20분)  ← 실전 느낌
   ↓
@@ -58,6 +60,7 @@ week04-hands-on/
 │   └── step4c_answer.py
 └── exercises/             ← 실습 가이드
     ├── 사전과제.md
+    ├── step0-harness-concept.md
     ├── step1-create-claude-md.md
     ├── step2-vibe-coding.md
     ├── step3-merge-files.md
@@ -68,17 +71,23 @@ week04-hands-on/
 
 ## 실습 순서
 
+### Step 0: 하네스(Harness) 개념 이해하기 (20분)
+👉 [exercises/step0-harness-concept.md](exercises/step0-harness-concept.md)
+
+같은 프롬프트를 3가지 환경에서 시켜보며 "도구의 차이"와 "하네스의 차이"를 구분합니다.
+체험 ①②를 먼저 하고, 체험 ③은 Step 2에서 완성합니다.
+
 ### Step 1: CLAUDE.md 만들기 (25분)
 👉 [exercises/step1-create-claude-md.md](exercises/step1-create-claude-md.md)
 
 AI에게 "내 업무가 뭔지" 알려주는 파일을 직접 만들어봅니다.
 CLAUDE.md가 있으면 AI가 훨씬 정확한 코드를 만들어줍니다.
 
-### Step 2: 바이브코딩 체험 (30분)
+### Step 2: 바이브코딩 체험 (25분)
 👉 [exercises/step2-vibe-coding.md](exercises/step2-vibe-coding.md)
 
 만든 CLAUDE.md를 AI에게 주고, 간단한 엑셀 처리 코드를 시켜봅니다.
-"경비내역.xlsx"를 부서별로 정리하는 코드를 AI가 만들어주는 것을 체험합니다.
+Step 0에서 하네스 없이 시켰던 것과 결과를 비교해봅니다.
 
 ### Step 3: 여러 파일 합치기 (20분)
 👉 [exercises/step3-merge-files.md](exercises/step3-merge-files.md)
