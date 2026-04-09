@@ -5,10 +5,17 @@
 
 ## 사전 준비
 
-```bash
-python -m pip install flask openpyxl
-python data/create_db.py
-```
+코드 실행은 Claude에게 시킵니다. 터미널을 직접 쓰지 않아도 됩니다.
+
+**Claude에게 이렇게 말하세요:**
+
+> "week05 실습 준비해줘. Flask 설치하고 `data/sales.db`를 만들어줘."
+
+Claude가 알아서 다음을 수행합니다:
+- `flask` 설치 (이미 설치돼 있으면 건너뜀, `sqlite3`는 Python 내장이라 불필요)
+- `data/create_db.py` 실행 → `data/sales.db` 생성 (법인 5 / 월별 매출 15 / 환율 5건)
+
+> 직접 실행하고 싶은 경우: 환경에 따라 `python`, `python3`, `py` 중 동작하는 것을 사용하세요. 예: `py -m pip install flask && py data/create_db.py`
 
 ## 실습 순서
 
