@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>재경팀 매출 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background: #f4f6f9;
+    color: #2c3e50;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  header { margin-bottom: 24px; }
+  h1 { font-size: 1.8em; margin: 0 0 6px 0; }
+  .subtitle { color: #6b7a8a; font-size: 0.95em; }
+  .server-time {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 12px;
+    background: #e8f4fd;
+    color: #1e6091;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-family: "Consolas", monospace;
+  }
+  .server-time::before { content: "● "; color: #27ae60; }
+  .filter-bar {
+    background: #fff;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .filter-bar label { font-weight: 600; font-size: 0.9em; }
+  .filter-bar select {
+    padding: 6px 12px;
+    border: 1px solid #cdd6e0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    background: #fff;
+  }
+  .filter-bar .hint { color: #8b98a8; font-size: 0.82em; margin-left: auto; }
+  .filter-bar a {
+    color: #c0392b;
+    text-decoration: none;
+    font-size: 0.85em;
+  }
+  .table-wrap {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+  }
+  thead th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 14px 16px;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+  }
+  thead th:first-child, thead th:nth-child(2) { text-align: left; }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eef1f5;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody td:first-child, tbody td:nth-child(2) {
+    text-align: left;
+    font-variant-numeric: normal;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr {
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  tbody tr:hover {
+    background: #eaf3fb;
+    transform: translateX(3px);
+    box-shadow: inset 4px 0 0 #1e6091;
+    cursor: pointer;
+  }
+  .corp-name a {
+    font-weight: 600;
+    color: #1e6091;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .corp-name a:hover { color: #c0392b; text-decoration: underline; }
+  .currency-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #eef2f6;
+    border-radius: 10px;
+    font-size: 0.85em;
+    color: #546778;
+  }
+  .krw { font-weight: 600; color: #1e6091; }
+  tfoot td {
+    padding: 14px 16px;
+    background: #eef2f6;
+    font-weight: 700;
+    border-top: 2px solid #2c3e50;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tfoot td:first-child { text-align: left; font-variant-numeric: normal; }
+  .total-krw { color: #c0392b; font-size: 1.05em; }
+  .chart-box:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); transition: box-shadow 0.2s ease; }
+  .scenario-bar {
+    background: #fff;
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .scenario-bar label { font-weight: 600; font-size: 0.9em; white-space: nowrap; }
+  .scenario-bar input[type="range"] {
+    flex: 1;
+    min-width: 180px;
+    accent-color: #1e6091;
+  }
+  .scenario-value {
+    font-family: "Consolas", monospace;
+    font-weight: 700;
+    color: #1e6091;
+    min-width: 56px;
+    text-align: right;
+  }
+  .scenario-value.up   { color: #c0392b; }
+  .scenario-value.down { color: #16a085; }
+  .scenario-bar button.reset {
+    background: #eef2f6;
+    border: 1px solid #cdd6e0;
+    color: #546778;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.82em;
+    cursor: pointer;
+  }
+  .scenario-bar button.reset:hover { background: #dde5ed; }
+  .rate-changed { background: #fff4e6 !important; transition: background 0.3s ease; }
+  .chart-note {
+    font-size: 0.78em;
+    color: #8b98a8;
+    margin-top: 6px;
+  }
+  .top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: #1e6091;
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .btn-primary:hover { background: #174f78; }
+  .flash {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.92em;
+    border-left: 4px solid;
+  }
+  .flash.success {
+    background: #e8f6ef;
+    color: #16704a;
+    border-left-color: #16a085;
+  }
+  .flash.error {
+    background: #fdecea;
+    color: #c0392b;
+    border-left-color: #c0392b;
+  }
+  @media (max-width: 720px) {
+    body { padding: 20px 12px; }
+    h1 { font-size: 1.4em; }
+    .filter-bar {
+      flex-wrap: wrap;
+      padding: 12px 14px;
+    }
+    .filter-bar .hint { display: none; }
+    thead th, tbody td, tfoot td { padding: 10px 10px; font-size: 0.9em; }
+    .currency-badge { font-size: 0.78em; padding: 1px 6px; }
+    tbody tr:hover { transform: none; }
+  }
+  .chart-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-top: 20px;
+  }
+  .chart-title {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="top-actions">
+        <div>
+          <h1>재경팀 매출 대시보드</h1>
+          <div class="subtitle">법인별 매출 합계 · 원화 환산</div>
+          <div class="server-time">서버 조회 시각: {{ now }}</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a class="btn-primary" style="background:#fff; color:#1e6091; border:1px solid #cdd6e0;" href="{{ url_for('history') }}">입력 이력</a>
+          <a class="btn-primary" href="{{ url_for('add_sale') }}">+ 새 매출 입력</a>
+        </div>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% if pipeline_failure %}
+      <div class="flash error" style="border-left-color:#e74c3c; background:#fdf0f0;">
+        <b>파이프라인 실패 감지</b> — 자동화 파이프라인이 마지막 실행에서 실패했습니다.<br>
+        {{ pipeline_failure }}<br>
+        <small>이 배너는 파이프라인을 성공적으로 재실행하면 자동으로 사라집니다.</small>
+      </div>
+    {% endif %}
+
+    {% if unmatched and unmatched > 0 %}
+      <div class="flash error">
+        ⚠ 환율이 등록되지 않은 월의 매출이 <b>{{ unmatched }}건</b> 있습니다.
+        해당 row는 대시보드 집계에서 제외됩니다.
+        <a href="{{ url_for('history') }}" style="color:#c0392b; font-weight:600;">입력 이력에서 확인 →</a>
+      </div>
+    {% endif %}
+
+    <form class="filter-bar" method="get" action="/">
+      <label for="month">조회 월:</label>
+      <select name="month" id="month" onchange="this.form.submit()">
+        <option value="">전체 ({% if months %}{{ months[0] }} ~ {{ months[-1] }}{% else %}데이터 없음{% endif %})</option>
+        {% for m in months %}
+          <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+      {% if selected_month %}
+        <a href="/">× 필터 해제</a>
+      {% endif %}
+      <span class="hint">URL 쿼리 파라미터로 서버에서 다시 SQL을 실행합니다</span>
+    </form>
+
+    <div class="scenario-bar">
+      <label for="rateAdjust">환율 시나리오:</label>
+      <input type="range" id="rateAdjust" min="-20" max="20" step="1" value="0">
+      <span class="scenario-value" id="rateValue">0%</span>
+      <button type="button" class="reset" id="rateReset">기준 환율로 리셋</button>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>법인명</th>
+          <th>통화</th>
+          <th>{% if selected_month %}{{ selected_month }} 매출{% else %}외화 합계{% endif %}</th>
+          <th>{% if selected_month %}월말 환율{% else %}가중평균 환율<sup>*</sup>{% endif %}</th>
+          <th>원화 환산</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr data-base-rate="{{ row['rate'] or 0 }}" data-base-krw="{{ row['krw'] }}">
+          <td class="corp-name">
+            <a href="/corp/{{ row['corp_code'] }}">{{ row["corp_name"] }} →</a>
+          </td>
+          <td><span class="currency-badge">{{ row["currency"] }}</span></td>
+          <td>{{ row["total"] | comma }}</td>
+          <td class="cell-rate">{% if row["rate"] %}{{ row["rate"] | comma }}{% else %}—{% endif %}</td>
+          <td class="krw cell-krw">{{ row["krw"] | comma }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">원화 환산 총합</td>
+          <td class="total-krw" id="totalKrwCell">{{ total_krw | comma }} 원</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+    {% if not selected_month %}
+    <div class="chart-note" style="margin-top:8px; padding-left:4px;">
+      * 환율은 매출 월의 <b>월말 환율</b>을 적용해 환산합니다. 표의 환율 컬럼은 금액 가중평균(= 원화환산 ÷ 외화합계)입니다.
+    </div>
+    {% endif %}
+
+    <div class="chart-box">
+      <div class="chart-title">법인별 원화 환산 매출{% if selected_month %} ({{ selected_month }}){% else %} ({% if months %}{{ months[0] }} ~ {{ months[-1] }}{% endif %} 합계){% endif %}</div>
+      <canvas id="salesChart" height="110"></canvas>
+      <div class="chart-note">※ 차트는 통화가 달라도 비교할 수 있도록 항상 원화 환산 기준입니다.</div>
+    </div>
+  </div>
+
+  <script>
+    const labels = {{ rows | map(attribute='corp_name') | list | tojson }};
+    const krwData = {{ rows | map(attribute='krw') | list | tojson }};
+    const colors = ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f", "#edc948", "#b07aa1", "#ff9da7"];
+
+    new Chart(document.getElementById("salesChart"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "원화 환산 매출 (원)",
+          data: krwData,
+          backgroundColor: colors,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.parsed.y.toLocaleString() + " 원"
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: v => (v / 100000000).toFixed(1) + "억"
+            }
+          }
+        }
+      }
+    });
+
+    // ── 환율 시나리오 슬라이더 (-20% ~ +20%) ──
+    const chartRef   = Chart.getChart("salesChart");
+    const slider     = document.getElementById("rateAdjust");
+    const valueLabel = document.getElementById("rateValue");
+    const resetBtn   = document.getElementById("rateReset");
+    const totalCell  = document.getElementById("totalKrwCell");
+    const tableRows  = document.querySelectorAll("tbody tr[data-base-krw]");
+
+    function fmt(n) { return Math.round(n).toLocaleString(); }
+    function fmtRate(r) {
+      const s = r.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      return Number(s).toLocaleString(undefined, { maximumFractionDigits: 3 });
+    }
+
+    function applyScenario(pct) {
+      const factor = 1 + pct / 100;
+
+      // 라벨 업데이트
+      valueLabel.textContent = (pct > 0 ? "+" : "") + pct + "%";
+      valueLabel.classList.toggle("up",   pct > 0);
+      valueLabel.classList.toggle("down", pct < 0);
+
+      // 각 행의 환율 / 원화 환산 셀 재계산
+      // 서버가 월별 환율을 정확히 적용해 만든 baseKrw를 그대로 사용해 ±%
+      const newKrwData = [];
+      let totalKrw = 0;
+      tableRows.forEach(tr => {
+        const baseRate = parseFloat(tr.dataset.baseRate);
+        const baseKrw  = parseFloat(tr.dataset.baseKrw);
+        const newRate  = baseRate * factor;
+        const newKrw   = Math.round(baseKrw * factor);
+
+        const rateCell = tr.querySelector(".cell-rate");
+        const krwCell  = tr.querySelector(".cell-krw");
+        rateCell.textContent = baseRate ? fmtRate(newRate) : "—";
+        krwCell.textContent  = fmt(newKrw);
+
+        // 변경 시 짧은 하이라이트
+        if (pct !== 0) {
+          rateCell.classList.add("rate-changed");
+          krwCell.classList.add("rate-changed");
+        } else {
+          rateCell.classList.remove("rate-changed");
+          krwCell.classList.remove("rate-changed");
+        }
+
+        totalKrw += newKrw;
+        newKrwData.push(newKrw);
+      });
+
+      totalCell.textContent = fmt(totalKrw) + " 원";
+
+      // 차트도 갱신
+      chartRef.data.datasets[0].data = newKrwData;
+      chartRef.update("none");
+    }
+
+    slider.addEventListener("input", e => applyScenario(parseInt(e.target.value, 10)));
+    resetBtn.addEventListener("click", () => {
+      slider.value = 0;
+      applyScenario(0);
+    });
+  </script>
+</body>
+</html>

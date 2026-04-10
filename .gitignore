@@ -1,0 +1,8 @@
+__pycache__/
+node_modules/
+*.pyc
+.env
+*.db
+package-lock.json
+package.json
+failure_*.flag

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>{{ corp["corp_name"] }} - 상세</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background: #f4f6f9;
+    color: #2c3e50;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #1e6091;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  .back-link:hover { text-decoration: underline; }
+  h1 { font-size: 1.7em; margin: 0 0 4px 0; }
+  .meta {
+    color: #6b7a8a;
+    font-size: 0.95em;
+    margin-bottom: 6px;
+  }
+  .server-time {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #e8f4fd;
+    color: #1e6091;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-family: "Consolas", monospace;
+    margin-bottom: 20px;
+  }
+  .server-time::before { content: "● "; color: #27ae60; }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .card .label { color: #8b98a8; font-size: 0.82em; }
+  .card .value { font-size: 1.3em; font-weight: 700; margin-top: 4px; }
+  .card.krw .value { color: #c0392b; }
+  .table-wrap {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 460px;
+  }
+  thead th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  thead th:first-child, thead th:last-child { text-align: left; }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #eef1f5;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody td:first-child, tbody td:last-child {
+    text-align: left;
+    font-variant-numeric: normal;
+  }
+  tbody tr {
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  tbody tr:hover {
+    background: #eaf3fb;
+    transform: translateX(3px);
+    box-shadow: inset 4px 0 0 #1e6091;
+  }
+  tfoot td {
+    padding: 14px 16px;
+    background: #eef2f6;
+    font-weight: 700;
+    border-top: 2px solid #2c3e50;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tfoot td:first-child { text-align: left; font-variant-numeric: normal; }
+  .note { color: #8b98a8; font-style: italic; }
+  .card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  }
+  @media (max-width: 720px) {
+    body { padding: 20px 12px; }
+    h1 { font-size: 1.35em; }
+    .summary { grid-template-columns: 1fr; }
+    thead th, tbody td, tfoot td { padding: 9px 10px; font-size: 0.9em; }
+    tbody tr:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="/">← 전체 법인 목록으로</a>
+    <h1>{{ corp["corp_name"] }}</h1>
+    <div class="meta">{{ corp["country"] }} · {{ corp["currency"] }} · 코드: {{ corp["corp_code"] }}</div>
+    <div class="server-time">서버 조회 시각: {{ now }}</div>
+
+    <div class="summary">
+      <div class="card">
+        <div class="label">전체 합계 (외화)</div>
+        <div class="value">{{ total | comma }} {{ corp["currency"] }}</div>
+      </div>
+      <div class="card">
+        <div class="label">가중평균 환율 (원/{{ corp["currency"] }})</div>
+        <div class="value">{{ rate | comma }}</div>
+      </div>
+      <div class="card krw">
+        <div class="label">원화 환산</div>
+        <div class="value">{{ total_krw | comma }} 원</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>월</th>
+          <th>금액 ({{ corp["currency"] }})</th>
+          <th>월말 환율</th>
+          <th>원화 환산</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in months %}
+        <tr>
+          <td>{{ m["month"] }}</td>
+          <td>{{ m["amount"] | comma }}</td>
+          <td>{% if m["rate"] %}{{ m["rate"] | comma }}{% else %}—{% endif %}</td>
+          <td>{% if m["krw"] %}{{ m["krw"] | comma }}{% else %}—{% endif %}</td>
+          <td class="note">{{ m["note"] or "" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>합계</td>
+          <td>{{ total | comma }}</td>
+          <td></td>
+          <td>{{ total_krw | comma }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+  </div>
+</body>
+</html>

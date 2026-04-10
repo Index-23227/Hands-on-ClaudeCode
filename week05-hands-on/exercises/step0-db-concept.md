@@ -8,7 +8,7 @@
 ## 엑셀과 DB, 뭐가 다른가요?
 
 여러분은 이미 week04에서 엑셀 자동화를 해봤습니다.
-법인 파일 5개를 합치고, 경비를 정리했죠.
+법인 파일 8개를 합치고, 경비를 정리했죠.
 
 그런데 현실에서는 이런 상황이 생깁니다:
 
@@ -59,7 +59,7 @@ week04에서 다룬 법인 매출 데이터가 이미 DB에 들어있습니다:
 ```
 sales.db (SQLite 데이터베이스)
 ├── corporations    → 법인 정보 (미국법인, 일본법인, ...)
-├── monthly_sales   → 월별 매출 (법인별 1~3월 매출액)
+├── monthly_sales   → 월별 매출 (법인별 1~6월 매출액)
 └── exchange_rates  → 환율 (USD 1,350원, JPY 9.2원, ...)
 ```
 
@@ -71,7 +71,7 @@ sales.db (SQLite 데이터베이스)
 ## week04 → week05 연결
 
 ```
-week04: 엑셀 파일 5개  →  Python으로 합치기  →  엑셀 결과
+week04: 엑셀 파일 8개  →  Python으로 합치기  →  엑셀 결과
                                                     ↓
 week05: 같은 데이터가 DB에  →  AI가 SQL로 조회  →  웹 브라우저에서 보기
 ```
@@ -94,9 +94,9 @@ python data/create_db.py
 이렇게 나오면 성공입니다:
 ```
 DB 생성 완료: data/sales.db
-  - corporations (법인 마스터) : 5건
-  - monthly_sales (월별 매출)  : 15건
-  - exchange_rates (환율)      : 5건
+  - corporations (법인 마스터) : 8건
+  - monthly_sales (월별 매출)  : 48건
+  - exchange_rates (환율)      : 48건
 ```
 
 이제 AI에게 이 DB를 조회시켜봅시다!

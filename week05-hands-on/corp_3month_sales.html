@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>법인별 3개월 매출 합계 (2026 Q1)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 20px;
+    color: #222;
+    background: #fafafa;
+  }
+  h1 { font-size: 1.6em; margin-bottom: 4px; }
+  .subtitle { color: #666; margin-bottom: 24px; font-size: 0.9em; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 32px;
+  }
+  th, td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    text-align: right;
+  }
+  th:first-child, td:first-child,
+  th:nth-child(2), td:nth-child(2) {
+    text-align: left;
+  }
+  thead th {
+    background: #2c3e50;
+    color: #fff;
+    font-weight: 600;
+  }
+  tbody tr:hover { background: #f4f7fa; }
+  tfoot td {
+    font-weight: bold;
+    background: #eef2f6;
+    border-top: 2px solid #2c3e50;
+  }
+  .chart-box {
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+</style>
+</head>
+<body>
+
+<h1>법인별 3개월 매출 합계</h1>
+<div class="subtitle">2026년 1월 ~ 3월 · 환율 기준일: 2026-03-31</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>법인명</th>
+      <th>통화</th>
+      <th>3개월 매출 합계</th>
+      <th>환율 (원/외화)</th>
+      <th>원화 환산</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>독일법인</td><td>EUR</td><td>304,000</td><td>1,480.000</td><td>449,920,000</td></tr>
+    <tr><td>미국법인</td><td>USD</td><td>375,000</td><td>1,350.000</td><td>506,250,000</td></tr>
+    <tr><td>베트남법인</td><td>VND</td><td>9,850,000,000</td><td>0.056</td><td>551,600,000</td></tr>
+    <tr><td>일본법인</td><td>JPY</td><td>46,900,000</td><td>9.200</td><td>431,480,000</td></tr>
+    <tr><td>중국법인</td><td>CNY</td><td>2,685,000</td><td>186.000</td><td>499,410,000</td></tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4">원화 환산 총합</td>
+      <td>2,438,660,000 원</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="chart-box">
+  <canvas id="salesChart" height="120"></canvas>
+</div>
+
+<script>
+const data = {
+  labels: ["독일법인", "미국법인", "베트남법인", "일본법인", "중국법인"],
+  datasets: [{
+    label: "원화 환산 매출 (원)",
+    data: [449920000, 506250000, 551600000, 431480000, 499410000],
+    backgroundColor: [
+      "#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f"
+    ],
+    borderRadius: 4
+  }]
+};
+
+new Chart(document.getElementById("salesChart"), {
+  type: "bar",
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "법인별 원화 환산 매출 (2026 Q1)",
+        font: { size: 16 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.parsed.y.toLocaleString() + " 원"
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: v => (v / 100000000).toFixed(1) + "억"
+        }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

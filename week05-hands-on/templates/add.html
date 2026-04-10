@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>새 매출 입력</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background: #f4f6f9;
+    color: #2c3e50;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .container { max-width: 560px; margin: 0 auto; }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #1e6091;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  .back-link:hover { text-decoration: underline; }
+  h1 { font-size: 1.6em; margin: 0 0 6px 0; }
+  .subtitle { color: #6b7a8a; font-size: 0.92em; margin-bottom: 20px; }
+  .card {
+    background: #fff;
+    padding: 28px 28px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #546778;
+    margin-bottom: 6px;
+  }
+  .field .req { color: #c0392b; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cdd6e0;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-family: inherit;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: #1e6091;
+    box-shadow: 0 0 0 3px rgba(30,96,145,0.12);
+  }
+  .field .help {
+    font-size: 0.78em;
+    color: #8b98a8;
+    margin-top: 4px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .currency-preview {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: #eef2f6;
+    border-radius: 10px;
+    font-size: 0.82em;
+    color: #546778;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  button, .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  button.primary {
+    background: #1e6091;
+    color: #fff;
+    border-color: #1e6091;
+    font-weight: 600;
+  }
+  button.primary:hover { background: #174f78; }
+  .btn.secondary {
+    background: #fff;
+    color: #546778;
+    border-color: #cdd6e0;
+  }
+  .btn.secondary:hover { background: #f4f7fa; }
+  .flash {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.9em;
+  }
+  .flash.error {
+    background: #fdecea;
+    color: #c0392b;
+    border-left: 4px solid #c0392b;
+  }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 1fr; }
+    .actions { flex-direction: column-reverse; }
+    .actions button, .actions .btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="{{ url_for('index') }}">← 대시보드로 돌아가기</a>
+    <h1>새 매출 데이터 입력</h1>
+    <div class="subtitle">monthly_sales 테이블에 INSERT됩니다 · 서버 시각 {{ now }}</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form class="card" method="post" action="{{ url_for('add_sale') }}" novalidate>
+      <div class="field">
+        <label for="corp_code">법인 <span class="req">*</span></label>
+        <select name="corp_code" id="corp_code" required>
+          <option value="">— 법인 선택 —</option>
+          {% for c in corps %}
+            <option value="{{ c['corp_code'] }}"
+                    data-currency="{{ c['currency'] }}"
+                    {% if form.corp_code == c['corp_code'] %}selected{% endif %}>
+              {{ c['corp_name'] }} ({{ c['currency'] }})
+            </option>
+          {% endfor %}
+        </select>
+        <div class="help">선택된 법인 통화: <span id="curPreview" class="currency-preview">—</span></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="month">월 (YYYY-MM) <span class="req">*</span></label>
+          <input type="month" name="month" id="month" value="{{ form.month }}" required>
+          <div class="help">예: 2026-04</div>
+        </div>
+        <div class="field">
+          <label for="amount">금액 (현지통화) <span class="req">*</span></label>
+          <input type="text" name="amount" id="amount" inputmode="decimal"
+                 value="{{ form.amount }}" placeholder="125000" required>
+          <div class="help">콤마 입력 가능 (예: 125,000)</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">비고 (선택)</label>
+        <textarea name="note" id="note" rows="2" placeholder="신규 거래처, 특이사항 등">{{ form.note }}</textarea>
+      </div>
+
+      <div class="actions">
+        <a class="btn secondary" href="{{ url_for('index') }}">취소</a>
+        <button type="submit" class="primary">매출 등록</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // 법인 선택 시 통화 미리보기
+    const sel = document.getElementById("corp_code");
+    const preview = document.getElementById("curPreview");
+    function updateCurrency() {
+      const opt = sel.options[sel.selectedIndex];
+      const cur = opt && opt.dataset.currency;
+      preview.textContent = cur || "—";
+    }
+    sel.addEventListener("change", updateCurrency);
+    updateCurrency();
+  </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>입력 이력 - 재경팀 매출 대시보드</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background: #f4f6f9;
+    color: #2c3e50;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .container { max-width: 1080px; margin: 0 auto; }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #1e6091;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  .back-link:hover { text-decoration: underline; }
+  h1 { font-size: 1.6em; margin: 0 0 4px 0; }
+  .subtitle { color: #6b7a8a; font-size: 0.92em; margin-bottom: 6px; }
+  .server-time {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #e8f4fd;
+    color: #1e6091;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-family: "Consolas", monospace;
+    margin-bottom: 20px;
+  }
+  .server-time::before { content: "● "; color: #27ae60; }
+  .flash {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.92em;
+    border-left: 4px solid;
+  }
+  .flash.success {
+    background: #e8f6ef;
+    color: #16704a;
+    border-left-color: #16a085;
+  }
+  .flash.error {
+    background: #fdecea;
+    color: #c0392b;
+    border-left-color: #c0392b;
+  }
+  .table-wrap {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+  }
+  thead th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 12px 14px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  tbody td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #eef1f5;
+    text-align: left;
+    vertical-align: middle;
+  }
+  tbody td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody tr:hover { background: #f7fafd; }
+  .id-cell {
+    font-family: "Consolas", monospace;
+    color: #8b98a8;
+    font-size: 0.85em;
+  }
+  .corp { font-weight: 600; }
+  .currency-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    background: #eef2f6;
+    border-radius: 10px;
+    font-size: 0.78em;
+    color: #546778;
+    margin-left: 4px;
+  }
+  .ts {
+    font-family: "Consolas", monospace;
+    font-size: 0.82em;
+    color: #6b7a8a;
+  }
+  .ts.legacy { color: #c0392b; font-style: italic; }
+  .note { color: #6b7a8a; font-style: italic; font-size: 0.88em; }
+  button.del {
+    background: #fff;
+    border: 1px solid #f0c0bd;
+    color: #c0392b;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.82em;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.del:hover { background: #fdecea; }
+  .empty {
+    background: #fff;
+    padding: 40px;
+    text-align: center;
+    color: #8b98a8;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .summary {
+    color: #6b7a8a;
+    font-size: 0.88em;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 720px) {
+    body { padding: 20px 12px; }
+    h1 { font-size: 1.35em; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="{{ url_for('index') }}">← 대시보드로 돌아가기</a>
+    <h1>매출 입력 이력</h1>
+    <div class="subtitle">monthly_sales 테이블의 모든 row를 입력 시각 역순으로 표시</div>
+    <div class="server-time">서버 조회 시각: {{ now }}</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% if entries %}
+      <div class="summary">총 {{ entries | length }}건의 이력 · 같은 법인+월에 여러 행이 있으면 자동으로 누적 합산됩니다</div>
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>입력 시각</th>
+            <th>법인</th>
+            <th>월</th>
+            <th class="num">금액</th>
+            <th>비고</th>
+            <th>작업</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entries %}
+          <tr>
+            <td class="id-cell">#{{ e['id'] }}</td>
+            <td>
+              {% if e['created_at'] %}
+                <span class="ts">{{ e['created_at'] }}</span>
+              {% else %}
+                <span class="ts legacy">초기 데이터</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="corp">{{ e['corp_name'] }}</span>
+              <span class="currency-badge">{{ e['currency'] }}</span>
+            </td>
+            <td>{{ e['month'] }}</td>
+            <td class="num">{{ e['amount'] | comma }}</td>
+            <td class="note">{{ e['note'] or '' }}</td>
+            <td>
+              <form method="post"
+                    action="{{ url_for('delete_entry', entry_id=e['id']) }}"
+                    onsubmit="return confirm('삭제하면 누적 합계에서도 빠집니다. {{ e['corp_name'] }} {{ e['month'] }} {{ e['amount'] | comma }} 이력을 삭제할까요?');">
+                <button type="submit" class="del">삭제</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    {% else %}
+      <div class="empty">등록된 매출 이력이 없습니다.</div>
+    {% endif %}
+  </div>
+</body>
+</html>
