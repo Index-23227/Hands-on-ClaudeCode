@@ -249,8 +249,8 @@ PowerShell에서 `schtasks` 명령 또는 `Register-ScheduledTask` cmdlet 사용
 - **실행 시각**: 매일 11:30 (한국수출입은행 환율 게시가 11:00 이후이므로 여유를 두고 11:30).
 - **Task 이름**: `Week06Pipeline`
 - **작업 내용**: `run_pipeline.py`를 프로젝트 루트(`week06-hands-on/`)에서 실행.
-- **등록 스크립트**: `answers/register_task_answer.ps1.txt` 참고 (강사용). Gmail 보안 차단 방지를 위해 `.ps1.txt` 확장자. 사용 시 `.txt`를 제거.
-- **수강생 PC에는 실제로 등록하지 않는다** — "등록 스크립트가 어떻게 생겼는지 보고, `taskschd.msc`로 내가 원할 때 수동으로 돌릴 수 있다"까지만 경험시킨다.
+- **등록 스크립트**: `answers/register_task_answer.ps1.txt` 참고. Gmail 보안 차단 방지를 위해 `.ps1.txt` 확장자. 사용 시 `.txt`를 제거.
+- **수강생도 직접 등록해본다** — 등록 → `taskschd.msc`에서 확인 → 수동 실행 → 삭제까지 한 사이클 체험. 강의가 끝나면 반드시 삭제: `Unregister-ScheduledTask -TaskName Week06Pipeline -Confirm:$false`
 
 ### 주의
 - PowerShell 스크립트는 **절대경로를 사용**한다. 작업 스케줄러는 CWD가 `C:\Windows\System32`이므로 상대경로는 깨진다.
@@ -282,7 +282,7 @@ KOREAEXIM_AUTHKEY=발급받은_인증키
 4. **DB 경로는 week05 공유**: `../week05-hands-on/data/sales.db`. DB가 없으면 week05의 `create_db.py`를 먼저 실행.
 5. **로그는 `logs/YYYYMMDD.log`에 append**. 같은 날 여러 번 돌려도 덮어쓰지 않고 누적.
 6. **`run_pipeline.py`는 `fetch_rates.py`, `import_sales.py`를 import해서 함수로 호출**한다. subprocess 금지.
-7. **작업 스케줄러 등록은 강사만 실행**한다. 수강생 PC는 건드리지 않는다.
+7. **작업 스케줄러는 수강생도 직접 등록**한다. 강의 종료 시 반드시 삭제(`Unregister-ScheduledTask -TaskName Week06Pipeline -Confirm:$false`).
 8. **`answers/` 폴더는 강사 전용**. 수강생 요청 이행 중에는 먼저 열거나 복사하지 않는다. 루트에 새 파일을 생성한다.
 9. **Python 실행 명령**은 환경에 따라 `python`, `python3`, `py` 중 동작하는 것 (Windows는 보통 `py`).
 10. **에러가 나면 AI에게 에러 메시지를 그대로 보여주고 고치게 한다**.
