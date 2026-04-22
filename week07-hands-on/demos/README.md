@@ -9,11 +9,11 @@
 
 | 폴더 | 데모 | 핵심 메시지 | 수강생 매칭 | 시간 |
 |---|---|---|---|---|
-| [receipt_ocr/](receipt_ocr/) | A. 영수증 OCR | 멀티모달 이미지 직접 처리 | 두 분 공통 (경비) | 10분 |
-| [dart_samsung/](dart_samsung/) | B. DART 삼성전자 | 외부 데이터 + AI 요약 체인 | 두 분 공통 (외부 조회) | 12분 |
-| [dashboard_3format/](dashboard_3format/) | D. PPT·HTML·JSX 3종 | 같은 데이터, 여러 출력 매체 | **육아름님** (Netra) | 15분 |
-| [email_receive/](email_receive/) | F1. 메일 수신 취합 | MCP로 Gmail 직접 접근 | **육아름님** (40법인 회신) | 12분 |
-| [email_send/](email_send/) | F2. 이상거래 알림 | SMTP 무인 발송 파이프라인 | **김인혜님** (이상출고) | 12분 |
+| [receipt_ocr/](receipt_ocr/) | A. 영수증 OCR | 멀티모달 이미지 직접 처리 | 전원 공통 (경비) | 10분 |
+| [dart_samsung/](dart_samsung/) | B. DART 삼성전자 | 외부 데이터 + AI 요약 체인 | 전원 공통 (외부 조회) | 12분 |
+| [dashboard_3format/](dashboard_3format/) | D. PPT·HTML·JSX 3종 | 같은 데이터, 여러 출력 매체 | **해외관리** (사내 대시보드) | 15분 |
+| [email_receive/](email_receive/) | F1. 메일 수신 취합 | MCP로 Gmail 직접 접근 | **해외관리** (40법인 회신) | 12분 |
+| [email_send/](email_send/) | F2. 이상거래 알림 | SMTP 무인 발송 파이프라인 | **영업관리** (이상출고) | 12분 |
 
 ---
 

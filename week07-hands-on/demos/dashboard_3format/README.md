@@ -95,9 +95,9 @@ week07-hands-on/demos/dashboard_3format/data/overseas_sales.xlsx를 읽어서
 - Step 1 끝나고 Step 2 시작 때: "데이터를 다시 설명할 필요 없었죠?"
 - Step 3 끝나고: "React 코드 직접 쓴 적 없으시죠? 이해도 못 하셔도 됩니다"
 
-### 2. **육아름 차장님 업무와 직접 연결**
+### 2. **해외관리 업무(사내 대시보드 제작)와 직접 연결**
 - 지금 Streamlit 대시보드 만드신 것과 같은 구조
-- 같은 데이터를 **PPT(경영회의)·HTML(내부 포털)·React(Netra 이식)** 세 매체로
+- 같은 데이터를 **PPT(경영회의)·HTML(내부 포털)·React(사내 시스템 이식)** 세 매체로
 - 목적에 맞게 골라 쓰면 됨
 
 ### 3. **CLAUDE.md의 힘**
