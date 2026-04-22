@@ -106,17 +106,22 @@ Step 3: React 컴포넌트로 변환 (CDN + Babel 단독 실행 HTML + DashBoard
 ---
 
 ### 데모 F1 — 메일 수신 취합 (12분) [상세](demos/email_receive/README.md) ⭐ 육아름님 직결
-**"받은편지함을 Claude가 직접 본다"** — MCP Gmail
+**"받은편지함을 Claude가 직접 본다"** — MCP Gmail (Claude.ai 커넥터)
 
-사전: `prep/send_sample_inbox_emails.py` 실행해 두어 8통 대기.
+사전: `prep/send_sample_inbox_emails.py --count 8` 실행해 두어 8통 대기.
 
 ```
-Claude, 내 Gmail 받은편지함에서 '매출 보고' 제목 메일 찾아서
-첨부 엑셀 모두 추출 → 한 파일로 취합 (KRW 환산 + 합계)
-저장: week07-hands-on/demos/email_receive/output/매출취합_2026-03.xlsx
+Claude, 내 Gmail 받은편지함에서 '매출 보고' 제목 메일 8통을 찾아서
+각 메일 본문의 "매출액: 875,000 CNY" 표시를 파싱한 뒤,
+week05 DB(../week05-hands-on/data/sales.db)의 2026-03-31 월말 환율로 KRW 환산해서
+한 파일로 취합해줘. 저장: week07-hands-on/demos/email_receive/output/매출취합_2026-03.xlsx
+(합계 기대값: 1,212,620,000 KRW)
 ```
 
 **육아름님에게**: "지금 40개 법인 회신을 하나씩 여는 그 작업입니다. 로직은 동일, 숫자만 40으로 늘어나면 됨"
+
+> ⚠️ **MCP 주의**: Claude.ai Gmail 커넥터는 첨부 바이너리 다운로드 미지원. 본문 파싱으로 우회.
+> Claude가 "첨부를 다운로드할게요"라고 하면 **"본문만 파싱해"** 로 가볍게 교정.
 
 ---
 
@@ -185,7 +190,8 @@ Step 3: 확인 후 .env의 SUB_ACCOUNTS로 SMTP 실제 발송
   py week07-hands-on/prep/make_abnormal_shipments.py
   py week07-hands-on/prep/make_overseas_sales.py
   ```
-- [ ] MCP Gmail 서버 설정 (또는 IMAP 폴백으로 진행 결정)
+- [ ] Claude.ai Connectors에서 **Gmail 커넥터 연결** (OAuth 1회) — 툴명 `mcp__claude_ai_Gmail__*` 사용
+  - 실패하거나 첨부까지 받아야 할 경우 IMAP 폴백(`fallback_imap.py`) 쓸지 결정
 
 ### 수업 당일 (1~2시간 전)
 - [ ] `py week07-hands-on/prep/send_sample_inbox_emails.py --count 8` → 샘플 메일 8통 강사 Gmail에 발송

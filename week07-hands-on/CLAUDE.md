@@ -162,6 +162,17 @@ Claude가 자유롭게 이름을 짓지 않도록 고정한다. 수강생이 재
    - D: `py demos/dashboard_3format/fallback_build_all.py`
    - F1: `py demos/email_receive/fallback_imap.py`
    - F2: `py demos/email_send/fallback_detect_and_send.py`
+
+### F1 MCP Gmail 제약 (중요)
+
+Claude.ai 네이티브 Gmail 커넥터(`mcp__claude_ai_Gmail__*`)는 `search_threads`·`get_thread`는
+제공하지만 **첨부 바이너리 다운로드는 지원하지 않는다**. F1 시연은 이 제약을 전제로 설계됨:
+
+- 샘플 메일 본문에 `매출액: 875,000 CNY` 형식으로 금액이 **본문에** 박혀있음 (발송 스크립트 설계)
+- Claude는 본문만 파싱해서 8법인 데이터 취합 → week05 DB 환율 조인 → xlsx 생성
+- 첨부까지 필요하면 `fallback_imap.py` 경로로 전환 (F2 쇼케이스에서 IMAP 자동화 시연)
+
+시연 시 Claude가 "첨부를 다운로드하겠다"고 하면 **"본문만 파싱해"** 로 유도.
 4. 각 데모 후 두 분(김인혜·육아름)에게 **"이거 지금 하시는 업무 중 어느 부분에 적용될까요?"** 질문.
 5. 2명 수강생이라 **질문 무제한 허용**. 대규모에서 불가능한 대화형 시연 활용.
 6. 후반 개인 지도 시 수강생에게 **`수강생과제_CLAUDE_템플릿.md`** 안내.
