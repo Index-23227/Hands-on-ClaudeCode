@@ -181,9 +181,9 @@ py week07-hands-on/demos/email_receive/fallback_imap.py
 email_receive/
 ├── README.md                    ← 이 문서
 ├── fallback_imap.py             ← IMAP 폴백 스크립트 (첨부까지 다운로드)
-└── output/                      ← 생성물
-    ├── 매출취합_2026-03.xlsx           ← 시연 결과물
-    └── 매출취합_2026-03.xlsx.build.py  ← MCP 흐름 재현용 빌더 (본문 파싱 결과 하드코딩)
+├── reproduce_from_mcp.py        ← MCP 조회 결과 내장한 xlsx 재생성 스크립트
+└── output/                      ← 생성물 (.gitignore)
+    └── 매출취합_2026-03.xlsx
 ```
 
 ## 시연 후 결과물 재현
@@ -191,8 +191,8 @@ email_receive/
 리허설 때 출력 파일을 지웠다가 다시 만들고 싶으면:
 
 ```bash
-py week07-hands-on/demos/email_receive/output/매출취합_2026-03.xlsx.build.py
+py week07-hands-on/demos/email_receive/reproduce_from_mcp.py
 ```
 
-이 빌더는 Gmail MCP 조회 결과(8법인 본문 파싱값)를 이미 내장하고 있어
+이 스크립트는 Gmail MCP 조회 결과(8법인 본문 파싱값)를 이미 내장하고 있어
 MCP 재조회 없이도 동일한 xlsx를 재생성한다. 합계 **1,212,620,000 KRW** 확인.
