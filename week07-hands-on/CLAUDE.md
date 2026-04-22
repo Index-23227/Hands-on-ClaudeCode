@@ -1,7 +1,7 @@
 # CLAUDE.md — 7주차 바이브코딩 쇼케이스 하네스
 
 > 강사가 Claude에게 **자연어로 데모를 시키면** 이 문서의 규칙이 자동 적용되도록 한다.
-> 6개 데모(`demos/*.py`)는 Claude 즉흥 생성이 실패했을 때의 강사용 폴백 정답이다.
+> 5개 데모(A/B/D/F1/F2)는 각자 서브폴더에 폴백 스크립트 포함.
 > 수강생은 코드를 직접 쓰지 않는다.
 
 ---
@@ -11,18 +11,33 @@
 ```
 week07-hands-on/
 ├── CLAUDE.md                      ← 이 문서 (하네스)
-├── README.md                      ← 6개 데모 프롬프트 모음 (강사용)
+├── README.md                      ← 데모 프롬프트 모음 + 시간표 (강사용)
 ├── 막힘카드.md                    ← 수강생용 치트시트
 ├── 검증체크리스트.md              ← 수강생용 결과 검증 가이드
-├── 수강생과제_CLAUDE_템플릿.md    ← 후반 워크숍에서 수강생이 채울 하네스
+├── 수강생과제_CLAUDE_템플릿.md    ← 개인지도에서 수강생이 채울 하네스
+├── 강사용_순회체크.md             ← 워크숍 진단 카드
+├── 강사_리허설가이드.md           ← 수업 전 드라이런 체크리스트
+├── 슬라이드_구성안.md             ← pptx 제작용 아웃라인
+├── prep/                          ← 강사 사전 준비 스크립트
+│   ├── .env.example               ← Gmail·DART 인증정보 템플릿
+│   ├── send_sample_inbox_emails.py  (F1용 샘플 메일 기본 2통, --count 8로 전체)
+│   ├── make_receipt_samples.py      (A용 영수증 PNG 8장 생성)
+│   ├── make_abnormal_shipments.py   (F2용 이상거래 xlsx 생성)
+│   └── make_overseas_sales.py       (D용 40법인 xlsx 생성)
 └── demos/
-    ├── demo1_compare_excel.py    ← 폴백 정답 (두 엑셀 비교)
-    ├── demo2_pdf_extract.py      ← 폴백 정답 (PDF → 엑셀)
-    ├── demo3_natural_query.py    ← 폴백 정답 (자연어 DB 질의)
-    ├── demo4_format_report.py    ← 폴백 정답 (서식 보고서)
-    ├── demo5_data_check.py       ← 폴백 정답 (정합성 체크)
-    ├── demo6_template_fill.py    ← 폴백 정답 (템플릿 반복)
-    └── output/                   ← 모든 결과물은 여기로
+    ├── receipt_ocr/               ← 데모 A: 영수증 OCR (Claude Vision)
+    │   ├── samples/*.png            (영수증 이미지 8장)
+    │   └── fallback_extract.py
+    ├── dart_samsung/              ← 데모 B: DART 삼성전자 분석
+    │   └── fallback_analysis.py
+    ├── dashboard_3format/         ← 데모 D: PPT + HTML + JSX 3종
+    │   ├── data/overseas_sales.xlsx
+    │   └── fallback_build_all.py
+    ├── email_receive/             ← 데모 F1: 법인 회신 메일 취합 (MCP Gmail)
+    │   └── fallback_imap.py
+    └── email_send/                ← 데모 F2: 이상거래 알림 메일 (SMTP)
+        ├── data/shipments.xlsx
+        └── fallback_detect_and_send.py
 ```
 
 ---
@@ -53,8 +68,14 @@ week04는 5개 법인(CN/DE/JP/US/VN)만 엑셀로 있고, 나머지 3개(IN/GB/
 ## 공통 규칙 — 모든 데모에 적용
 
 ### 출력 경로
-- **모든 생성 파일은 `week07-hands-on/demos/output/`에 저장한다.** 예외 없음.
+- **모든 생성 파일은 해당 데모 서브폴더의 `output/`에 저장한다.**
+  - A 영수증 → `demos/receipt_ocr/output/`
+  - B DART → `demos/dart_samsung/output/`
+  - D 3종 → `demos/dashboard_3format/output/`
+  - F1 수신 → `demos/email_receive/output/`
+  - F2 발송 → `demos/email_send/output/`
 - 프롬프트에 경로가 명시되지 않아도 이 규칙을 따른다.
+- `output/` 폴더는 `.gitignore` 처리됨 (재생성 가능).
 
 ### 라이브러리 정책
 - 엑셀 처리: **`openpyxl`만** 사용 (pandas 금지 — 수강생 환경 부담)
@@ -121,30 +142,35 @@ Claude에게 환산 요청 시 **"어떤 환율 기준인지"** 반드시 명시
 
 Claude가 자유롭게 이름을 짓지 않도록 고정한다. 수강생이 재현 확인하기 쉽게.
 
-| 데모 | 출력 파일명 |
-|---|---|
-| 데모 1 — 엑셀 비교 | `3월_매출.xlsx`, `4월_매출.xlsx`, `비교결과_3월vs4월.xlsx` |
-| 데모 2 — PDF 추출 | `세금계산서_추출.xlsx` |
-| 데모 3 — 자연어 질의 | (출력 파일 없음, 콘솔·대시보드 응답) |
-| 데모 4 — 서식 보고서 | `매출보고서_2026상반기.xlsx` |
-| 데모 5 — 정합성 체크 | `회계시스템_4월.xlsx`, `ERP_4월.xlsx`, `정합성_체크결과.xlsx` |
-| 데모 6 — 반복 템플릿 | `매출보고서_2026-04.xlsx`, `매출보고서_2026-05.xlsx`, `매출보고서_2026-06.xlsx` |
+| 데모 | 출력 파일명 | 출력 위치 |
+|---|---|---|
+| A — 영수증 OCR | `경비정리_2026-03.xlsx` | `demos/receipt_ocr/output/` |
+| B — DART 삼성전자 | `삼성전자_재무비교.xlsx` | `demos/dart_samsung/output/` |
+| D — 3종 대시보드 | `매출보고서.pptx`, `dashboard.html`, `dashboard_react.html`, `DashBoard.jsx` | `demos/dashboard_3format/output/` |
+| F1 — 메일 수신 취합 | `매출취합_2026-03.xlsx` | `demos/email_receive/output/` |
+| F2 — 이상거래 알림 | `detection_report.txt` + SMTP 실제 발송 | `demos/email_send/output/` |
 
 ---
 
 ## 시연 시 지켜야 할 것 (강사용)
 
 1. **프롬프트는 README.md에 있는 것을 그대로 복붙**한다. 즉석에서 수정하면 기대 결과가 흔들림.
-2. Claude가 엉뚱한 경로에 저장하면 `demos/output/`로 옮기도록 즉시 지시.
-3. 데모가 실패하면 `py demos/demoN_*.py` 폴백 실행.
-4. 각 데모 후 학생에게 **"이거 여러분 업무 중에 비슷한 게 있나요?"** 질문. 이 답이 후반 워크숍 재료가 됨.
-5. 후반 워크숍 전환 시 수강생에게 **`수강생과제_CLAUDE_템플릿.md`** 안내.
+2. Claude가 엉뚱한 경로에 저장하면 각 데모의 `output/`로 옮기도록 즉시 지시.
+3. 데모가 실패하면 각 서브폴더의 `fallback_*.py` 폴백 실행.
+   - A: `py demos/receipt_ocr/fallback_extract.py`
+   - B: `py demos/dart_samsung/fallback_analysis.py`
+   - D: `py demos/dashboard_3format/fallback_build_all.py`
+   - F1: `py demos/email_receive/fallback_imap.py`
+   - F2: `py demos/email_send/fallback_detect_and_send.py`
+4. 각 데모 후 두 분(김인혜·육아름)에게 **"이거 지금 하시는 업무 중 어느 부분에 적용될까요?"** 질문.
+5. 2명 수강생이라 **질문 무제한 허용**. 대규모에서 불가능한 대화형 시연 활용.
+6. 후반 개인 지도 시 수강생에게 **`수강생과제_CLAUDE_템플릿.md`** 안내.
 
 ---
 
-## 워크숍 전환 (강사 체크포인트)
+## 개인지도 전환 (강사 체크포인트)
 
-쇼케이스 30분 끝난 뒤 수강생이 본인 업무를 가져오는 워크숍으로 전환할 때:
+쇼케이스 60분 + 쉬는 시간 끝난 뒤 2명 개인지도(각 15분)로 전환할 때:
 
 1. 수강생 각자의 업무 폴더(예: `내업무_자동화/`)를 만들게 한다.
 2. `수강생과제_CLAUDE_템플릿.md` 내용을 복사해서 해당 폴더의 `CLAUDE.md`로 저장시킨다.
